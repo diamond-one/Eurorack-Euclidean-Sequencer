@@ -31,7 +31,8 @@ int internalTempo;
 ///// USER CONTROLS (POTS, BUTTONS & SWITCHES)
 
 // int PosPin = 6; //Unused as of yet (Should be offset)
-// int pulsesPin = 1;
+int pulsesPin = 3;
+unsigned int pulses = 1;
 // int tempoPin = 1;
 
 ///// ENCODER VARIABLES AND DECLIRATION 
@@ -49,20 +50,18 @@ ezButton seqSwitcher(5);
 long time = 0;         // the last time the output pin was toggled
 long debounce = 50;   // the debounce time, increase if the output flickers
 
-
 ///// DECLARING FUNCTIONS
 int Xpos(int position);
 int Ypos(int position);
 int sequenceProgress(int position);
 void sequencerCheck();
 void pinChangeISR();
-
+String euclideanAlgo(int beats, int steps);
 
 ///// NAVIGATING THE LED MATRIX
 const int width = 8;
 int x;
 int y;
-
 
 void setup() {
   Serial.begin(9600);
@@ -70,9 +69,6 @@ void setup() {
   matrix.begin(0x70);  // pass in the address
   tempoTimer.setTimeOutTime(500); // 1 second.
   seqSwitcher.setDebounceTime(50); // set debounce time to 50 milliseconds
-
-
-
 
 ///// FULL DEVICE RESET
   tempoTimer.reset(); 
@@ -117,6 +113,13 @@ seqSwitcher.loop(); // MUST call the loop() function first
       legnth = seq3Memory;
     }
 }
+pulses = map(analogRead(pulsesPin), 0, 1023, 16, 0);
+///// EUCLIDEAN ALGO TEST AREA 
+  String euclidTestPattern = euclideanAlgo(pulses, legnth); //NOT SURE IF LEGNTH IS GOING TO WORK HERE
+  Serial.println(euclidTestPattern);
+  // delay(500);
+
+
 ///// ENCODER PRINT OUT 
   if (old_count != count) {
     // Serial.println(count);
@@ -214,6 +217,57 @@ void pinChangeISR() {
   abOld = abNew;        // Save new state
 }
 
+String euclideanAlgo(int beats, int steps) //Steps == pulses
+{
+    //We can only have as many beats as we have steps (0 <= beats <= steps)
+    if (beats > steps)
+        beats = steps;
+
+    //Each iteration is a process of pairing strings X and Y and the remainder from the pairings
+    //X will hold the "dominant" pair (the pair that there are more of)
+    String x = "1";
+    int x_amount = beats;
+
+    String y = "0";
+    int y_amount = steps - beats;
+
+    do
+    {
+        //Placeholder variables
+        int x_temp = x_amount;
+        int y_temp = y_amount;
+        String y_copy = y;
+
+        //Check which is the dominant pair 
+        if (x_temp >= y_temp)
+        {
+            //Set the new number of pairs for X and Y
+            x_amount = y_temp;
+            y_amount = x_temp - y_temp;
+
+            //The previous dominant pair becomes the new non dominant pair
+            y = x;
+        }
+        else
+        {
+            x_amount = x_temp;
+            y_amount = y_temp - x_temp;
+        }
+
+        //Create the new dominant pair by combining the previous pairs
+        x = x + y_copy;
+    } while (x_amount > 1 && y_amount > 1);//iterate as long as the non dominant pair can be paired (if there is 1 Y left, all we can do is pair it with however many Xs are left, so we're done)
+
+    //By this point, we have strings X and Y formed through a series of pairings of the initial strings "1" and "0"
+    //X is the final dominant pair and Y is the second to last dominant pair
+    String rhythm;
+    for (int i = 1; i <= x_amount; i++)
+        rhythm += x;
+    for (int i = 1; i <= y_amount; i++)
+        rhythm += y;
+    return rhythm;
+}
+
 //// THINGS TO ADD
 // RESET ALL WITH LONG BUTTON PRESS 
 // ADD LEGNTH CONTROL FOR EACH SEQUENCE 
@@ -222,3 +276,4 @@ void pinChangeISR() {
 // ADD OFFSET CONTROL
 // MAKE ENCODER INCRIMENT 1 AT A TIME, NOT 2
 // ADD LED TO SHOW WHICH SEQUENCER YOU'RE USING 
+// MAP BPM TO A NON LINIAR INCREMENT
