@@ -16,17 +16,22 @@ int legnth = 16;
 int seq1Counter = 0;
 int seq1Legnth = 16;
 int seq1Memory = 16;
+String euclid1Memory;
 
 int seq2Counter = 16;
 int seq2Legnth = 32;
 int seq2Memory = 16;
+String euclid2Memory;
 
 int seq3Counter = 32;
 int seq3Legnth = 48;
 int seq3Memory = 16;
+String euclid3Memory;
 
 const int internalTempoPin = 2;
 int internalTempo;
+
+String euclidPattern = "1000100010001000"; // Init 4x4 pattern
 
 ///// USER CONTROLS (POTS, BUTTONS & SWITCHES)
 
@@ -102,6 +107,8 @@ seqSwitcher.loop(); // MUST call the loop() function first
     if (stateCounter == 1){
       seq3Memory = legnth;
       legnth = seq1Memory;
+      // euclid3Memory = euclidPattern;
+      // euclidPattern = euclid1Memory;
     }
     else if (stateCounter == 2){
       seq1Memory = legnth;
@@ -115,9 +122,7 @@ seqSwitcher.loop(); // MUST call the loop() function first
 }
 pulses = map(analogRead(pulsesPin), 0, 1023, 16, 0);
 ///// EUCLIDEAN ALGO TEST AREA 
-  String euclidTestPattern = euclideanAlgo(pulses, legnth); //NOT SURE IF LEGNTH IS GOING TO WORK HERE
-  Serial.println(euclidTestPattern);
-  // delay(500);
+String euclidPattern = euclideanAlgo(pulses, legnth); //NOT SURE IF LEGNTH IS GOING TO WORK HERE
 
 
 ///// ENCODER PRINT OUT 
@@ -149,6 +154,35 @@ if (tempoTimer.hasTimedOut()){ // keeping tempo
    if (seq3Counter >= seq3Legnth){
   seq3Counter = 32;
   }
+
+///// LIGHTING UP LEDS ON PULSE DEVISION
+
+for (int x = 0; x < 16; x++){
+int y = euclidPattern.indexOf("1", x);
+Serial.println(y);
+sequenceProgress(y);
+}
+
+// for (int x = 16; x < 32; x++){
+// int y = euclidPattern.indexOf("1", x);
+// Serial.println(y);
+// sequenceProgress(y);
+// }
+
+// for (int x = 32; x < 48; x++){
+// int y = euclidPattern.indexOf("1", x);
+// Serial.println(y);
+// sequenceProgress(y);
+// }
+
+// for (int x = 48; x < 64; x++){
+// int y = euclidPattern.indexOf("1", x);
+// Serial.println(y);
+// sequenceProgress(y);
+// }
+
+
+  
 
 ///// SEQUENCE LEGNTH MODIFICATION  
 switch (stateCounter){
@@ -270,10 +304,9 @@ String euclideanAlgo(int beats, int steps) //Steps == pulses
 
 //// THINGS TO ADD
 // RESET ALL WITH LONG BUTTON PRESS 
-// ADD LEGNTH CONTROL FOR EACH SEQUENCE 
-// ADD BPM ADJUSTMENT
-// ADD EUCLID MATH
 // ADD OFFSET CONTROL
 // MAKE ENCODER INCRIMENT 1 AT A TIME, NOT 2
-// ADD LED TO SHOW WHICH SEQUENCER YOU'RE USING 
+// ADD LED TWO ROW FLASH TO SHOW WHICH SEQUENCER YOU'RE USING 
 // MAP BPM TO A NON LINIAR INCREMENT
+// ADD DEVSION TO PULSES IF LEGNTH IS SHORTENED?
+// MAKE EUCLID PATTERN WORK ON TWO SEQUENCERS
