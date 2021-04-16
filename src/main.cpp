@@ -28,6 +28,11 @@ int seq3Legnth = 48;
 int seq3Memory = 16;
 String euclid3Memory;
 
+int seq4Counter = 48;
+int seq4Legnth = 64;
+int seq4Memory = 16;
+String euclid4Memory;
+
 const int internalTempoPin = 2;
 int internalTempo;
 
@@ -80,6 +85,7 @@ void setup() {
   seq1Counter = 0;  // so all sequencers start at the same time, on their first beat
   seq2Counter = 16; // so all sequencers start at the same time, on their first beat
   seq3Counter = 32; // so all sequencers start at the same time, on their first beat
+  seq4Counter = 48; // so all sequencers start at the same time, on their first beat
   stateCounter = 1; // so the state of the button is 1, making the encoder deal with sequencer 1 
   matrix.clear();   // clearing matrix to start
 
@@ -105,11 +111,11 @@ seqSwitcher.loop(); // MUST call the loop() function first
     sequencerCheck();
     Serial.println(stateCounter);
     if (stateCounter == 1){
-      seq3Memory = legnth;
+      seq4Memory = legnth;
       legnth = seq1Memory;
       // euclid3Memory = euclidPattern;
       // euclidPattern = euclid1Memory;
-    }
+        }
     else if (stateCounter == 2){
       seq1Memory = legnth;
       legnth = seq2Memory;
@@ -118,6 +124,11 @@ seqSwitcher.loop(); // MUST call the loop() function first
     else if (stateCounter == 3){
       seq2Memory = legnth;
       legnth = seq3Memory;
+        }
+
+        else if (stateCounter == 4){
+      seq3Memory = legnth;
+      legnth = seq4Memory;
     }
 }
 pulses = map(analogRead(pulsesPin), 0, 1023, 16, 0);
@@ -143,6 +154,7 @@ if (tempoTimer.hasTimedOut()){ // keeping tempo
   seq1Counter = seq1Counter +1; // progressing the sequencers 1 step
   seq2Counter = seq2Counter +1; // progressing the sequencers 1 step
   seq3Counter = seq3Counter +1; // progressing the sequencers 1 step
+  seq4Counter = seq4Counter +1; // progressing the sequencers 1 step
 
 ///// KEEPING SEQUIENCERS PROGRESSING ONE STEP AT A TIME, AS LONG AS THEIR SEQLEGNTH
   if (seq1Counter >= seq1Legnth){ // keeping steps inside their own 16 step sequencer
@@ -154,14 +166,17 @@ if (tempoTimer.hasTimedOut()){ // keeping tempo
    if (seq3Counter >= seq3Legnth){
   seq3Counter = 32;
   }
+     if (seq4Counter >= seq4Legnth){
+  seq4Counter = 48;
+  }
 
 ///// LIGHTING UP LEDS ON PULSE DEVISION
 
-for (int x = 0; x < 16; x++){
-int y = euclidPattern.indexOf("1", x);
-Serial.println(y);
-sequenceProgress(y);
-}
+// for (int x = 0; x < 16; x++){
+// int y = euclidPattern.indexOf("1", x);
+// Serial.println(y);
+// sequenceProgress(y);
+// }
 
 // for (int x = 16; x < 32; x++){
 // int y = euclidPattern.indexOf("1", x);
@@ -187,7 +202,7 @@ sequenceProgress(y);
 ///// SEQUENCE LEGNTH MODIFICATION  
 switch (stateCounter){
   case 1:
-  seq1Legnth = legnth;
+  seq1Legnth = legnth; 
   break;
 
   case 2:
@@ -197,12 +212,17 @@ switch (stateCounter){
   case 3:
   seq3Legnth = legnth + 32;
   break;
+
+  case 4:
+  seq4Legnth = legnth + 48;
+  break;
 }
 
 ///// ROUTING STEP COUNTERS TO XY ON LED MATRIX 
 sequenceProgress(seq1Counter);
 sequenceProgress(seq2Counter);
 sequenceProgress(seq3Counter);
+sequenceProgress(seq4Counter);
 tempoTimer.reset();
 
 }
@@ -233,7 +253,7 @@ matrix.writeDisplay();
 ///// THIS CHECKS WHICH SEQUENCE THE LEGNTH KNOB SHOULD BE
 void sequencerCheck(){ //sequencer A B or C (1,2,3)
   stateCounter = stateCounter +1; //Strange... stateCounter++ doesn't work here. Why?
-  if (stateCounter >= 4){
+  if (stateCounter >= 5){
     stateCounter = 1;  // i've put the following inside this top if statment.. needed? 
   }
 }
