@@ -1,13 +1,13 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include <Adafruit_GFX.h>
-#include "Adafruit_LEDBackpack.h"
+// #include <Adafruit_GFX.h>
+// #include "Adafruit_LEDBackpack.h"
 #include <SPI.h>
 #include <SoftTimers.h>
 #include <ezButton.h>
 #include <ClickEncoder.h>
 #include <TimerOne.h>
-Adafruit_8x8matrix matrix = Adafruit_8x8matrix();
+// Adafruit_8x8matrix matrix = Adafruit_8x8matrix();
 
 /* AIGHT bruv, in a nutshell, this is what i'm building https://dbkaplun.github.io/euclidean-rhythm/
 a euclidian sequencer. Basically you give it a few perameters and it outputs beats. 
@@ -39,17 +39,20 @@ int seq1Legnth = 16; // 16 because it's the last in the first sequence.. the oth
 // same logic
 int seq1Memory = 16; // This is a variable that the program stores the legnth of a sequence in case it was changed
 //by the user. 
-String seq1EuclidMem = ; // holding euclidan sequence in 'memory' while we deal with other sequencers. 
+// String seq1EuclidMem = ; // holding euclidan sequence in 'memory' while we deal with other sequencers. 
 
 int seq2Counter = 16;
 int seq2Legnth = 32;
 int seq2Memory = 16;
-String seq1EuclidMem = ;
+// String seq1EuclidMem = ;
 
 int seq3Counter = 32;
 int seq3Legnth = 48;
 int seq3Memory = 16;
-String seq1EuclidMem = ;
+// String seq1EuclidMem = ;
+
+const int legnthPin = 1; //allocating a potentiometer to Pin 2 on the circuit board.  
+// int legnthPin ;
 
 const int internalTempoPin = 2; //allocating a potentiometer to Pin 2 on the circuit board.  
 int internalTempo;
@@ -70,7 +73,6 @@ int old_count;              // old rotary count
 // This helps me read if the encoder button is pushed or not
 int stateCounter = 1; // Can be 1,2 or 3.. each state is a sequencer
 ezButton seqSwitcher(5); 
-// bool switcherPrevious = HIGH;  /CAN DELETE 
 
 //REDUCING CURCIT NOISE ON BUTTON PRESSES
 // this eliminates any false button presses due to short circuts in the encoder. 
@@ -79,22 +81,17 @@ long debounce = 50;    // the debounce time, increase if the output flickers
 
 ///// DECLARING FUNCTIONS
 // function explinations at bottom of page above each fucntion. 
-int Xpos(int position); 
-int Ypos(int position);
-int sequenceProgress(int position); 
+
+// int sequenceProgress(int position); 
 void sequencerCheck();
 void pinChangeISR();
 String euclideanAlgo(int beats, int steps);
 
-///// NAVIGATING THE LED MATRIX
-const int width = 8;
-int x;
-int y;
+
 
 void setup() {
   Serial.begin(9600);
   Serial.println("Euclidian sequencer program running");
-  matrix.begin(0x70);  // pass in the address
   tempoTimer.setTimeOutTime(500); // 1 second.
   seqSwitcher.setDebounceTime(50); // set debounce time to 50 milliseconds
 
@@ -105,7 +102,6 @@ void setup() {
   seq2Counter = 16; // so all sequencers start at the same time, on their first beat
   seq3Counter = 32; // so all sequencers start at the same time, on their first beat
   stateCounter = 1; // so the state of the button is 1, making the encoder deal with sequencer 1 
-  matrix.clear();   // clearing matrix to start
 
 ///// ENCODER SETUP
   pinMode(PinA, IPINMODE);
@@ -147,24 +143,26 @@ seqSwitcher.loop(); // MUST call the loop() function first
 //this will then be our devision for our euclidian devision algorythm. 
 pulses = map(analogRead(pulsesPin), 0, 1023, 16, 0);
 // pulses = 3; // comment out the line above, and uncomment this if you want to change the euclidian devision manually
+legnth = map(analogRead(legnthPin), 0, 1023, 16, 0);
 
 ///// EUCLIDEAN ALGO TEST AREA 
   String euclidPattern = euclideanAlgo(pulses, legnth); 
   // This will give you a read out in your terminal of 0's and 1's.
-  // Serial.println(euclidPattern); 
+  Serial.println(euclidPattern); 
   // delay(500); // Delay if you want to slow that shit down in the terminal
 
 
 ///// ENCODER PRINT OUT 
-  if (old_count != count) {
+  // // if (old_count != count) {
+  // if (old_count != count) {
   
-    old_count = count;
-    // because encoders are endless,t his is constraining it's output to 16 steps. 
-    //The print out actually goes outside of the 0-16 range, but 'legnth' doesn't
+  //   old_count = count;
+  //   // because encoders are endless,t his is constraining it's output to 16 steps. 
+  //   //The print out actually goes outside of the 0-16 range, but 'legnth' doesn't
   
-    legnth = constrain(count, 0, 16);
-    // Serial.println(count); //Uncomment to see encoder output
-  }
+  //   legnth = constrain(count, 0, 16);
+  //   // Serial.println(count); //Uncomment to see encoder output
+  // }
 
 // BPM ADJUSTMENT 
 // this is reading an analog potentioemter, mapping it to readable tempos... 10BPM-2000BPM
@@ -172,22 +170,22 @@ internalTempo = map(analogRead(internalTempoPin), 0, 1023, 10, 2000);
 tempoTimer.setTimeOutTime(internalTempo); 
 // Serial.println(internalTempo); //DEBUG
 
-if (tempoTimer.hasTimedOut()){  // keeping tempo without using 'delay' functions
-  matrix.clear();               // clear LED display, this happens just this once, though each loop
-  seq1Counter = seq1Counter +1; // progressing sequence 1, 1 step
-  seq2Counter = seq2Counter +1; // progressing sequence 2, 1 step
-  seq3Counter = seq3Counter +1; // progressing sequence 3, 1 step
+// if (tempoTimer.hasTimedOut()){  // keeping tempo without using 'delay' functions
+//   matrix.clear();               // clear LED display, this happens just this once, though each loop
+//   seq1Counter = seq1Counter +1; // progressing sequence 1, 1 step
+//   seq2Counter = seq2Counter +1; // progressing sequence 2, 1 step
+//   seq3Counter = seq3Counter +1; // progressing sequence 3, 1 step
 
 ///// KEEPING SEQUIENCERS PROGRESSING ONE STEP AT A TIME, AS LONG AS THEIR 'seqLegnth'
-  if (seq1Counter >= seq1Legnth){ // keeping steps inside their own 16 steps
-  seq1Counter = 0;
-  }
-  if (seq2Counter >= seq2Legnth){
-  seq2Counter = 16;
-  }
-   if (seq3Counter >= seq3Legnth){
-  seq3Counter = 32;
-  }
+  // if (seq1Counter >= seq1Legnth){ // keeping steps inside their own 16 steps
+  // seq1Counter = 0;
+  // }
+  // if (seq2Counter >= seq2Legnth){
+  // seq2Counter = 16;
+  // }
+  //  if (seq3Counter >= seq3Legnth){
+  // seq3Counter = 32;
+  // }
 
 ///// SEQUENCE LEGNTH MODIFICATION 
 // this uses the switcher from the buttom press to adjust the lengh of each sequence.  
@@ -205,36 +203,12 @@ switch (stateCounter){
   break;
 }
 
-///// ROUTING STEP COUNTERS TO XY ON LED MATRIX 
-sequenceProgress(seq1Counter);
-sequenceProgress(seq2Counter);
-sequenceProgress(seq3Counter);
-tempoTimer.reset();
 
 }
-}
+
 
 ///// FUNCTIONS BELOW ///// FUNCTIONS BELOW ///// FUNCTIONS BELOW ///// 
 
-///// THIS FORMULA LETS THE PROGRAM ACCESS TWO XY COORDINATES WITH A SINGLE DIGIT
-int Xpos (int position){
-int m = floor(position/width);
-return m;
-}
-
-int Ypos (int position){
-int o = position % width;
-return o;
-}
-
-// THIS FUNCTION APPLIES THE X AND Y TO ACCESS LEDS ON THE LED MATRIX
-int sequenceProgress(int position){
-x = Xpos(position);
-y = Ypos(position);
- 
-matrix.drawPixel(y, x, LED_ON);  
-matrix.writeDisplay();  
-}
 
 ///// THIS CHECKS WHICH SEQUENCE THE LEGNTH KNOB SHOULD BE
 void sequencerCheck(){ //sequencer A B or C (1,2,3)
@@ -309,11 +283,20 @@ String euclideanAlgo(int beats, int steps) //Steps == pulses
 }
 
 //// THINGS TO ADD
+
+
+
+// ____________________________
+// Headless todo list 
+// Change Tempo to an external input
 // RESET ALL WITH LONG BUTTON PRESS 
 // ADD LEGNTH CONTROL FOR EACH SEQUENCE 
-// ADD BPM ADJUSTMENT
-// ADD EUCLID MATH
 // ADD OFFSET CONTROL
 // MAKE ENCODER INCRIMENT 1 AT A TIME, NOT 2
 // ADD LED TO SHOW WHICH SEQUENCER YOU'RE USING 
 // MAP BPM TO A NON LINIAR INCREMENT
+
+// WORKING:
+// BPM, Pulse, Legnth pots
+
+
