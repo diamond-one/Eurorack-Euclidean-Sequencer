@@ -1,5 +1,20 @@
 # Euclidean Sequencer Arduino Sketch
 
+## Status
+**Planned Features:
+**
+Change Tempo to an external input
+Reset all with a long button press
+Add length control for each sequence
+Add offset control
+Make encoder increment 1 step at a time (currently 2 steps)
+Add LED indicator to show which sequencer you're using
+Map BPM to a non-linear increment
+
+**Currently Working Features:
+**
+BPM, Pulse, Length pots
+
 ## Overview
 
 This Arduino sketch implements a Euclidean sequencer that generates rhythmic patterns based on user-defined parameters. The sequencer can be controlled using a rotary encoder, button, and analog potentiometers. It outputs sequences of 1s and 0s, representing beats and rests, which can be used to trigger external musical instruments or visual displays.
