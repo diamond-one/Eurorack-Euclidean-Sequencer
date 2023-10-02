@@ -12,7 +12,7 @@
 - Map BPM to a non-linear increment
 
 **Currently Working Features:**
-- BPM, Pulse, Length pots
+- BPM, Pulse, Length pots, euclidian math/division of length
 
 ## Overview
 
