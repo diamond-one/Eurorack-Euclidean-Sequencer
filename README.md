@@ -1,19 +1,18 @@
 # Euclidean Sequencer Arduino Sketch
 
 ## Status
-### Planned Features:
 
-Change Tempo to an external input
-Reset all with a long button press
-Add length control for each sequence
-Add offset control
-Make encoder increment 1 step at a time (currently 2 steps)
-Add LED indicator to show which sequencer you're using
-Map BPM to a non-linear increment
+**Planned Features:**
+- Change Tempo to an external input
+- Reset all with a long button press
+- Add length control for each sequence
+- Add offset control
+- Make encoder increment 1 step at a time (currently 2 steps)
+- Add LED indicator to show which sequencer you're using
+- Map BPM to a non-linear increment
 
-### Currently Working Features:
-
-BPM, Pulse, Length pots
+**Currently Working Features:**
+- BPM, Pulse, Length pots
 
 ## Overview
 
